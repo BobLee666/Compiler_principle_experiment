@@ -6,7 +6,8 @@ char token[10];
 char character;
 int val;
 FILE *fp;//输出
-FILE *fw; //输入 
+FILE *fw,*errfw; //输入 
+int lineNum;
 int num;
 char reserveList[9][10]={"begin","end","integer"
 ,"if","then","else","function","read","write"};
@@ -35,7 +36,10 @@ void getNextchar(){
 }
 void getnbc(){                                                 //但在一个文件的结尾，不会有非空白,在getNextchar()上做文章 
 	while(character==' '||character=='\n'||character==9){
-		if(character=='\n') returnToFile("EOLN",24);
+		if(character=='\n'){
+			lineNum++;
+			returnToFile("EOLN",24);
+		} 
 		getNextchar();
 	}//三种空白字符 空格，换行，tab 
 }
@@ -75,10 +79,12 @@ int reserve(){
 } */
 
 void error(){
-	printf("冒号后面不是=\n");
+	fprintf(errfw,"***LINE:%d  冒号后面不是=\n",lineNum);
+//	printf("冒号后面不是=\n");
 }
 void defaultError(){
-	printf("非法输入符号\n");
+	fprintf(errfw,"***LINE:%d  冒号后面不是=\n",lineNum);
+//	printf("非法输入符号\n");
 }
 
 void LexAnalyze(){
@@ -225,8 +231,8 @@ int main(){
 		printf("cannot open test.txt\n");
 		return 1;
 	}
-	if((fw=fopen("G:\\test.dyd","w+"))==NULL){
-		printf("cannot create output.txt\n");
+	if((fw=fopen("G:\\test.dyd","w+"))==NULL||errfw=fopen("G:\\test.err","w+"))==NULL){
+		printf("cannot create test.dyd or test.err\n");
 		return 1;
 	}
 	while(!feof(fp)){
@@ -236,5 +242,6 @@ int main(){
 //	fprintf(fw,"123123\n");
 	fclose(fp);
 	fclose(fw);
+	fclose(errfw);
 	return 0;
 }
